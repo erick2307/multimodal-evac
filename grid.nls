@@ -1,0 +1,49 @@
+globals [ grid-flag ]
+
+breed [ bots bot ]
+
+;  set grid-flag false ;AT SETUP
+
+to draw-grid
+  create-bots world-width [
+    set hidden? true
+    set ycor min-pycor
+    set xcor who + .5
+    set color 9
+    set heading 0
+    pd
+    fd world-height
+    die
+  ]
+  create-bots world-height [
+    set hidden? true
+    set xcor min-pxcor
+    set ycor who + .5
+    set color 9
+    set heading 90
+    pd
+    fd world-width
+    die
+  ]
+  ask bots [die]
+end
+
+;this is a button
+to grid-on-off
+  ifelse grid-flag
+  [clear-drawing set grid-flag false]
+  [draw-grid set grid-flag true]
+end
+
+to draw-path [ agent ]
+    hatch-bots 1 [
+    set hidden? true
+    move-to first [p-path] of agent
+    let path but-first [p-path] of agent
+    set pen-size 5
+    pd
+    foreach path
+    [ x -> move-to x ]
+    die
+  ]
+end
