@@ -1,0 +1,118 @@
+;; MODIFIED FROM on http://modelingcommons.org/browse/one_model/3645#model_tabs_browse_info
+
+turtles-own
+[
+  vx                ;; x velocity
+  vy                ;; y velocity
+  desired-direction ;; my desired direction
+  driving-forcex    ;; my main motivating force
+  driving-forcey
+  obstacle-forcex   ;; force exerted by obstacles
+  obstacle-forcey
+  territorial-forcex;; force exerted by neighbors
+  territorial-forcey
+]
+
+;;;; Functions for calculating the social forces ;;;;
+;; move the turtle according to the rules of the social forces model
+to move-peds
+  let ax driving-forcex + obstacle-forcex + territorial-forcex
+  let ay driving-forcey + obstacle-forcey + territorial-forcey
+
+  set vx vx + ax
+  set vy vy + ay
+
+  ;; scale down the velocity if it is too high
+  let vmag magnitude vx vy
+  let multiplier 1
+  if vmag > max-speed
+  [set multiplier max-speed / vmag]
+
+  set vx vx * multiplier
+  set vy vy * multiplier
+
+  set xcor xcor + vx
+  set ycor ycor + vy
+end
+;; find the territorial force according to the social forces model
+to calc-territorial-forces
+  set territorial-forcex 0
+  set territorial-forcey 0
+  ask other turtles with [distance myself > 0]
+  [
+    let to-agent (towards myself) - 180
+    let rabx [xcor] of myself - xcor
+    let raby [ycor] of myself - ycor
+    let speed magnitude vx vy
+    let to-root ((magnitude rabx raby) + (magnitude (rabx - (speed * sin desired-direction)) (raby - (speed * cos desired-direction)))) ^ 2 - speed ^ 2
+    if to-root < 0
+    [set to-root 0]
+    let b 0.5 * sqrt to-root
+
+    let agent-force (- v0) * exp (- b / sigma)
+
+    ask myself
+    [
+      let agent-forcex agent-force * (sin to-agent)
+      let agent-forcey agent-force * (cos to-agent)
+      ;; modify the effect this force has based on whether or not it is in the field of view
+      let vision field-of-view-modifier driving-forcex driving-forcey agent-forcex agent-forcey
+      set territorial-forcex territorial-forcex + agent-forcex * vision
+      set territorial-forcey territorial-forcey + agent-forcey * vision
+    ]
+  ]
+end
+;; find the obstacle force of the turtle according to the social forces model
+to calc-obstacle-force
+  set obstacle-forcex 0
+  set obstacle-forcey 0
+  ask patches in-radius (rd 5) with [pcolor = 89]
+  [
+    let to-obstacle (towards myself) - 180
+    let obstacle-force (- u0) * exp (- (distance myself) / r)
+    ask myself
+    [
+     set obstacle-forcex obstacle-forcex + obstacle-force * (sin to-obstacle)
+     set obstacle-forcey obstacle-forcey + obstacle-force * (cos to-obstacle)
+    ]
+  ]
+  ask cars in-radius (rd 5)
+  [
+    let to-obstacle (towards myself) - 180
+    let obstacle-force (- u0) * exp (- (distance myself) / r)
+    ask myself
+    [
+     set obstacle-forcex obstacle-forcex + obstacle-force * (sin to-obstacle)
+     set obstacle-forcey obstacle-forcey + obstacle-force * (cos to-obstacle)
+    ]
+  ]
+end
+;; find the driving force of the turtle
+to calc-driving-force
+  set driving-forcex (1 / tau) * (max-speed * (sin desired-direction) - vx) 
+  set driving-forcey (1 / tau) * (max-speed * (cos desired-direction) - vy) 
+end
+
+;; find the heading towards the nearest goal
+to calc-desired-direction
+  if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
+  if patch-here = p-destination [ die ]
+  set desired-direction towards p-goal
+end
+
+;; helper function to find the magnitude of a vector
+to-report magnitude [x y]
+  report sqrt ((x ^ 2) + (y ^ 2))
+end
+
+;; returns 1 if the angle between the desired vector and the force vector is within a threshold, else return c
+to-report field-of-view-modifier [desiredx desiredy forcex forcey]
+  ifelse (desiredx * (- forcex) + desiredy * (- forcey)) >= (magnitude forcex forcey) * cos (60 / 2)
+  [ report 1 ]
+  [ report 0.5]
+end
+
+
+
+
+

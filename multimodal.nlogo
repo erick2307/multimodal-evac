@@ -1,4 +1,4 @@
-__includes [ "env.nls" "grid.nls" "routes.nls" ]
+__includes [ "env.nls" "grid.nls" "routes.nls" "sfm.nls"]
 
 globals [
   scale
@@ -23,7 +23,7 @@ to setup
   create-road
   create-sidewalk
   set-points
-  inject-cars
+  if number-of-cars != 0 [ inject-cars ]
   inject-peds
 end
 
@@ -31,9 +31,9 @@ end
 
 to go
   ask cars [ c-move ]
-  ask peds [ p-move ]
+  ask peds [ p-move-2 ]
   if ticks mod fps = 0 and count peds < max-peds [ inject-peds ]
-  if ticks mod (10 * fps) = 0 and count cars < max-cars [ inject-cars ]
+  if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ inject-cars ]
   tick
 end
 
@@ -41,8 +41,8 @@ end
 
 to inject-cars
   create-cars 1 [
-    set shape "car top"
-    set size 5 / scale
+    set shape "dot" ;"car top"
+    set size rd 5
     set color one-of [ red blue ]
     set xcor min-pxcor + swidth / scale
     set ycor rd ((2 * total + height) / 4 )
@@ -53,8 +53,8 @@ to inject-cars
   ]
 
   create-cars 1 [
-    set shape "car top"
-    set size 5 / scale
+    set shape "dot" ;"car top"
+    set size rd 5
     set color blue
     set xcor max-pxcor - swidth / scale
     set ycor rd ((2 * total - height) / 4 )
@@ -66,9 +66,9 @@ to inject-cars
 end
 
 to inject-peds
-  create-peds 1 [
+  create-peds 10 [
     set shape "dot"
-    set size 0.5 / scale * 2
+    set size rd 0.5 * 2
     set color one-of [ red blue green ]
     move-to get-one-origin-point
     set p-path select-trajectory patch-here
@@ -115,6 +115,16 @@ to c-update
 end
 
 ;###########################################################################################################
+
+to p-move-2
+    calc-desired-direction
+    calc-driving-force
+    calc-obstacle-force
+    if any? other peds
+      [ calc-territorial-forces ]
+    move-peds
+end
+
 
 to p-move ;in Gorrini et al, 2018 terms
   face p-goal
@@ -169,8 +179,8 @@ GRAPHICS-WINDOW
 99
 0
 99
-0
-0
+1
+1
 1
 fps
 30.0
@@ -244,9 +254,9 @@ SLIDER
 181
 number-of-cars
 number-of-cars
-1
+0
 100
-2.0
+0.0
 1
 1
 NIL
@@ -261,7 +271,7 @@ number-of-pedestrians
 number-of-pedestrians
 1
 100
-11.0
+100.0
 1
 1
 NIL
@@ -321,7 +331,7 @@ car-look-ahead-cars
 car-look-ahead-cars
 1
 50
-40.0
+50.0
 1
 1
 m
@@ -336,7 +346,7 @@ car-look-ahead-peds
 car-look-ahead-peds
 0
 100
-50.0
+100.0
 1
 1
 m
@@ -366,7 +376,7 @@ alfaVV
 alfaVV
 10
 180
-80.0
+180.0
 10
 1
 deg
@@ -381,7 +391,7 @@ alfaVP
 alfaVP
 10
 180
-80.0
+180.0
 10
 1
 deg
@@ -396,7 +406,7 @@ ped-look-ahead-peds
 ped-look-ahead-peds
 0
 100
-5.0
+100.0
 1
 1
 m
@@ -411,7 +421,7 @@ ped-look-ahead-cars
 ped-look-ahead-cars
 0
 100
-50.0
+100.0
 1
 1
 m
@@ -426,7 +436,7 @@ ped-stop-ahead-cars
 ped-stop-ahead-cars
 1
 20
-10.0
+20.0
 1
 1
 m
@@ -441,7 +451,7 @@ alfaPV
 alfaPV
 10
 180
-100.0
+180.0
 10
 1
 deg
@@ -456,7 +466,7 @@ alfaPP
 alfaPP
 10
 180
-100.0
+180.0
 10
 1
 deg
@@ -517,6 +527,118 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+13
+799
+185
+832
+max-speed
+max-speed
+0
+1
+0.2
+.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+833
+185
+866
+v0
+v0
+0
+10
+3.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+867
+185
+900
+sigma
+sigma
+0.1
+10
+0.5
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+901
+185
+934
+u0
+u0
+0
+20
+0.0
+.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+936
+185
+969
+r
+r
+0.1
+10
+0.1
+.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+12
+971
+184
+1004
+tau
+tau
+1
+30
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+588
+1021
+673
+1066
+Pedestrians
+count peds
+17
+1
+11
+
+MONITOR
+676
+1022
+832
+1067
+STD
+standard-deviation [ magnitude vx vy ] of peds
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
