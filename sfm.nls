@@ -22,55 +22,7 @@ end
 ;; find the heading towards the nearest goal
 to calc-desired-direction
   set desired-direction towards p-goal
-;  if distance-to-agent p-goal < rd 5
-;  [ let dist-to-goal distance-to-agent p-goal
-;    let new-goal-x [pxcor] of p-goal + (1 / dist-to-goal) * sin (angle p-goal item 1 p-remain)
-;    let new-goal-y [pycor] of p-goal + (1 / dist-to-goal) * cos (angle p-goal item 1 p-remain)
-;;    show p-goal
-;;    show new-goal-x
-;;    show new-goal-y
-;    set desired-direction towards patch-at new-goal-x new-goal-y ]
 end
-
-;to-report angle [ a b ]
-;  let ang 0
-;  ask b [ set ang towards a ]
-;  report ang 
-;end
-;
-;to-report distance-to-agent [ agent ]
-;  report rd distance agent
-;end
-;
-;to-report distance-to-point [ x y ]
-;  report sqrt ( (xcor - x) ^ 2 + (ycor - y) ^ 2 )
-;end
-
-
-
-;to-report calc-partial-driving-force-x [ i-goal power ]
-;  let dir towards i-goal
-;  let gamma 0.9 ^ power
-;  let partial-drive-force-x gamma * (1 / tau) * (p-veloc-max * (sin dir) - p-velocx) 
-;  report partial-drive-force-x
-;end
-;
-;to-report calc-partial-driving-force-y [ i-goal power ]
-;  let dir towards i-goal
-;  let gamma 0.9 ^ power
-;  let partial-drive-force-y gamma * (1 / tau) * (p-veloc-max * (cos dir) - p-velocy)
-;  report partial-drive-force-y
-;end
-;
-;to-report partial-forcesx
-;  let forcesx map [ x -> calc-partial-driving-force-x x position x p-remain ] p-remain
-;  report sum forcesx
-;end
-;
-;to-report partial-forcesy
-;  let forcesy map [ y -> calc-partial-driving-force-y y position y p-remain ] p-remain
-;  report sum forcesy
-;end
 
 ;; find the driving force of the turtle
 to calc-driving-force
@@ -166,9 +118,9 @@ end
 
 ;; returns 1 if the angle between the desired vector and the force vector is within a threshold, else return c
 to-report field-of-view-modifier [desiredx desiredy forcex forcey]
-  ifelse (desiredx * (- forcex) + desiredy * (- forcey)) >= (magnitude forcex forcey) * cos (60 / 2)
+  ifelse (desiredx * (- forcex) + desiredy * (- forcey)) >= (magnitude forcex forcey) * cos (360 / 2)
   [ report 1 ]
-  [ report 0.5]
+  [ report 0.1]
 end
 
 
