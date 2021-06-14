@@ -2,8 +2,8 @@
 
 turtles-own
 [
-  vx                ;; x velocity
-  vy                ;; y velocity
+  p-velocx                ;; x velocity
+  p-velocy                ;; y velocity
   desired-direction ;; my desired direction
   driving-forcex    ;; my main motivating force
   driving-forcey
@@ -14,26 +14,19 @@ turtles-own
 ]
 
 ;;;; Functions for calculating the social forces ;;;;
-;; move the turtle according to the rules of the social forces model
-to move-peds
-  let ax driving-forcex + obstacle-forcex + territorial-forcex
-  let ay driving-forcey + obstacle-forcey + territorial-forcey
-
-  set vx vx + ax
-  set vy vy + ay
-
-  ;; scale down the velocity if it is too high
-  let vmag magnitude vx vy
-  let multiplier 1
-  if vmag > max-speed
-  [set multiplier max-speed / vmag]
-
-  set vx vx * multiplier
-  set vy vy * multiplier
-
-  set xcor xcor + vx
-  set ycor ycor + vy
+;; find the heading towards the nearest goal
+to calc-desired-direction
+  if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
+  if patch-here = p-destination [ die ]
+  set desired-direction towards p-goal
 end
+
+;; find the driving force of the turtle
+to calc-driving-force
+  set driving-forcex (1 / tau) * (p-veloc-max * (sin desired-direction) - p-velocx) 
+  set driving-forcey (1 / tau) * (p-veloc-max * (cos desired-direction) - p-velocy) 
+end
+
 ;; find the territorial force according to the social forces model
 to calc-territorial-forces
   set territorial-forcex 0
@@ -43,7 +36,7 @@ to calc-territorial-forces
     let to-agent (towards myself) - 180
     let rabx [xcor] of myself - xcor
     let raby [ycor] of myself - ycor
-    let speed magnitude vx vy
+    let speed magnitude p-velocx p-velocy
     let to-root ((magnitude rabx raby) + (magnitude (rabx - (speed * sin desired-direction)) (raby - (speed * cos desired-direction)))) ^ 2 - speed ^ 2
     if to-root < 0
     [set to-root 0]
@@ -62,6 +55,32 @@ to calc-territorial-forces
     ]
   ]
 end
+
+;; move the turtle according to the rules of the social forces model
+to move-peds
+  let ax driving-forcex + obstacle-forcex + territorial-forcex
+  let ay driving-forcey + obstacle-forcey + territorial-forcey
+
+  set p-velocx p-velocx + ax
+  set p-velocy p-velocy + ay
+
+  ;; scale down the velocity if it is too high
+  let vmag magnitude p-velocx p-velocy
+  let multiplier 1
+  if vmag > p-veloc-max
+  [set multiplier p-veloc-max / vmag]
+
+  set p-velocx p-velocx * multiplier
+  set p-velocy p-velocy * multiplier
+
+  set xcor xcor + rd (p-velocx / fps)
+  set ycor ycor + rd (p-velocy / fps)
+  
+  if p-velocx != 0
+  [ set heading atan p-velocx p-velocy ]
+
+end
+
 ;; find the obstacle force of the turtle according to the social forces model
 to calc-obstacle-force
   set obstacle-forcex 0
@@ -87,18 +106,7 @@ to calc-obstacle-force
     ]
   ]
 end
-;; find the driving force of the turtle
-to calc-driving-force
-  set driving-forcex (1 / tau) * (max-speed * (sin desired-direction) - vx) 
-  set driving-forcey (1 / tau) * (max-speed * (cos desired-direction) - vy) 
-end
 
-;; find the heading towards the nearest goal
-to calc-desired-direction
-  if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
-  if patch-here = p-destination [ die ]
-  set desired-direction towards p-goal
-end
 
 ;; helper function to find the magnitude of a vector
 to-report magnitude [x y]

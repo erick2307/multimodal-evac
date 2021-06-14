@@ -9,12 +9,13 @@ globals [
 breed [ cars car ]
 breed [ peds ped ]
 
-peds-own [ p-origin p-destination p-path p-remain p-goal p-veloc p-veloc-max ]
+peds-own [ p-origin p-destination p-path p-remain p-goal p-velocx p-velocy p-veloc-max ]
 cars-own [ c-goal c-veloc c-veloc-max ]
 
 to setup
   clear-all
   reset-ticks
+  random-seed 1
   ask patches [ set pcolor white ]
   set scale 0.5 ;(m/patch)
   set total max-pxcor * scale ;m
@@ -23,8 +24,9 @@ to setup
   create-road
   create-sidewalk
   set-points
-  if number-of-cars != 0 [ inject-cars ]
-  inject-peds
+  if number-of-cars != 0 [ insert-cars ]
+  ;insert-peds
+  show "Why velocity is too slow!!? Distance versus time is not fitting the 1.5m/s velcoity set"
 end
 
 ;###########################################################################################################
@@ -32,14 +34,14 @@ end
 to go
   ask cars [ c-move ]
   ask peds [ p-move-2 ]
-  if ticks mod fps = 0 and count peds < max-peds [ inject-peds ]
-  if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ inject-cars ]
+  if ticks mod (5 * 60 * fps) = 0 and count peds < max-peds [ insert-peds ]
+  if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ insert-cars ]
   tick
 end
 
 ;###########################################################################################################
 
-to inject-cars
+to insert-cars
   create-cars 1 [
     set shape "dot" ;"car top"
     set size rd 5
@@ -65,9 +67,9 @@ to inject-cars
   ]
 end
 
-to inject-peds
+to insert-peds
   create-peds 10 [
-    set shape "dot"
+    ;set shape "dot"
     set size rd 0.5 * 2
     set color one-of [ red blue green ]
     move-to get-one-origin-point
@@ -76,8 +78,9 @@ to inject-peds
     set p-origin first p-path
     set p-destination last p-path
     set p-goal item 1 p-path
-    set p-veloc-max random-normal 1.5 0.5 / fps
-    set p-veloc p-veloc-max
+    set p-veloc-max rd ((random-normal 1.5 0.5) / fps)
+    set p-velocx p-veloc-max
+    set p-velocy p-veloc-max
     if peds-pen-flag [ pd ]
     ;draw-path self
     ;set heading 90
@@ -126,37 +129,37 @@ to p-move-2
 end
 
 
-to p-move ;in Gorrini et al, 2018 terms
-  face p-goal
-  p-sense ;approach
-  p-decide ;appraise
-  p-update ;cross
-  if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
-  if patch-here = p-destination [ die ]
-end
+;to p-move ;in Gorrini et al, 2018 terms
+;  face p-goal
+;  p-sense ;approach
+;  p-decide ;appraise
+;  p-update ;cross
+;  if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
+;  if patch-here = p-destination [ die ]
+;end
 
-to p-sense
-  let np count other peds in-cone (ped-look-ahead-peds / scale ) alfaPP ;60
-  let dp ceiling distance min-one-of peds [ distance myself ] / scale
-  ;adjust velocity based on pedestrians
-  ;ifelse np >= 1 and dp > 0 [ set p-veloc p-veloc * (random-float ( dp /  np  ) ) ] [ set p-veloc p-veloc-max ]
-  ifelse np >= 1 and dp > 0 [ set p-veloc p-veloc-max * ( 1 - exp(-1.913 * (1 / np - 1 / 5.4 ) ) )] [ set p-veloc p-veloc-max ]
-end
+;to p-sense
+;  let np count other peds in-cone (ped-look-ahead-peds / scale ) alfaPP ;60
+;  let dp ceiling distance min-one-of peds [ distance myself ] / scale
+;  ;adjust velocity based on pedestrians
+;  ;ifelse np >= 1 and dp > 0 [ set p-veloc p-veloc * (random-float ( dp /  np  ) ) ] [ set p-veloc p-veloc-max ]
+;  ifelse np >= 1 and dp > 0 [ set p-veloc p-veloc-max * ( 1 - exp(-1.913 * (1 / np - 1 / 5.4 ) ) )] [ set p-veloc p-veloc-max ]
+;end
 
-to p-decide
-  let nc count cars in-cone (ped-look-ahead-cars / scale) alfaPV ; 60
-  let dc ceiling distance min-one-of cars [ distance myself ] / scale
-  ;adjust velocity
-  if nc >= 1 and dc > ped-stop-ahead-cars [ set p-veloc 1.5 * p-veloc-max ]
-  if nc >= 1 and dc < ped-stop-ahead-cars [ set p-veloc min list p-veloc-max ( p-veloc-max / (ped-look-ahead-cars - ped-stop-ahead-cars) * ( dc - ped-stop-ahead-cars) )  ]
+;to p-decide
+;  let nc count cars in-cone (ped-look-ahead-cars / scale) alfaPV ; 60
+;  let dc ceiling distance min-one-of cars [ distance myself ] / scale
+;  ;adjust velocity
+;  if nc >= 1 and dc > ped-stop-ahead-cars [ set p-veloc 1.5 * p-veloc-max ]
+;  if nc >= 1 and dc < ped-stop-ahead-cars [ set p-veloc min list p-veloc-max ( p-veloc-max / (ped-look-ahead-cars - ped-stop-ahead-cars) * ( dc - ped-stop-ahead-cars) )  ]
+;
+;  ;old version
+;  ;if nc >= 1 and dc > 0 [ set p-veloc p-veloc * (random-float ( 1 / ( nc * dc ) ) ) ]
+;end
 
-  ;old version
-  ;if nc >= 1 and dc > 0 [ set p-veloc p-veloc * (random-float ( 1 / ( nc * dc ) ) ) ]
-end
-
-to p-update
-  fd rd p-veloc
-end
+;to p-update
+;  fd rd p-veloc
+;end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -211,7 +214,7 @@ width
 width
 5
 25
-10.0
+5.0
 5
 1
 m
@@ -226,7 +229,7 @@ height
 height
 5
 25
-10.0
+5.0
 5
 1
 m
@@ -241,7 +244,7 @@ swidth
 swidth
 1
 5
-2.0
+5.0
 0.5
 1
 m
@@ -530,21 +533,6 @@ NIL
 
 SLIDER
 13
-799
-185
-832
-max-speed
-max-speed
-0
-1
-0.2
-.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-13
 833
 185
 866
@@ -632,13 +620,30 @@ count peds
 MONITOR
 676
 1022
-832
+733
 1067
 STD
-standard-deviation [ magnitude vx vy ] of peds
-17
+standard-deviation [ magnitude p-velocx p-velocy ] of peds
+3
 1
 11
+
+BUTTON
+143
+249
+206
+282
+NIL
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
