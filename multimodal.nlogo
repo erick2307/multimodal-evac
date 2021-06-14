@@ -9,7 +9,7 @@ globals [
 breed [ cars car ]
 breed [ peds ped ]
 
-peds-own [ p-origin p-destination p-path p-remain p-goal p-velocx p-velocy p-veloc-max ]
+peds-own [ p-origin p-destination p-path p-remain p-goal p-veloc-max ]
 cars-own [ c-goal c-veloc c-veloc-max ]
 
 to setup
@@ -26,7 +26,6 @@ to setup
   set-points
   if number-of-cars != 0 [ insert-cars ]
   ;insert-peds
-  show "Why velocity is too slow!!? Distance versus time is not fitting the 1.5m/s velcoity set"
 end
 
 ;###########################################################################################################
@@ -34,7 +33,7 @@ end
 to go
   ask cars [ c-move ]
   ask peds [ p-move-2 ]
-  if ticks mod (5 * 60 * fps) = 0 and count peds < max-peds [ insert-peds ]
+  if ticks mod (30 * fps) = 0 and count peds < max-peds [ insert-peds ]
   if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ insert-cars ]
   tick
 end
@@ -69,7 +68,7 @@ end
 
 to insert-peds
   create-peds 10 [
-    ;set shape "dot"
+    set shape "dot"
     set size rd 0.5 * 2
     set color one-of [ red blue green ]
     move-to get-one-origin-point
@@ -120,12 +119,13 @@ end
 ;###########################################################################################################
 
 to p-move-2
-    calc-desired-direction
-    calc-driving-force
-    calc-obstacle-force
-    if any? other peds
-      [ calc-territorial-forces ]
-    move-peds
+  calc-desired-direction
+  calc-driving-force
+  calc-obstacle-force
+  if any? other peds
+    [ calc-territorial-forces ]
+  move-peds
+  verify-arrival
 end
 
 
@@ -214,7 +214,7 @@ width
 width
 5
 25
-5.0
+10.0
 5
 1
 m
@@ -229,7 +229,7 @@ height
 height
 5
 25
-5.0
+10.0
 5
 1
 m
@@ -244,7 +244,7 @@ swidth
 swidth
 1
 5
-5.0
+4.0
 0.5
 1
 m
