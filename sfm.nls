@@ -16,7 +16,7 @@ turtles-own
 ;;;; Functions for calculating the social forces ;;;;
 to verify-arrival
   if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
-  if patch-here = p-destination [ die ]
+  if patch-here = p-destination [ set p-out-time ticks if log? [ do-log ] die ]
 end
 
 ;; find the heading towards the nearest goal
@@ -121,6 +121,19 @@ to-report field-of-view-modifier [desiredx desiredy forcex forcey]
   ifelse (desiredx * (- forcex) + desiredy * (- forcey)) >= (magnitude forcex forcey) * cos (360 / 2)
   [ report 1 ]
   [ report 0.1]
+end
+
+to do-log
+  file-open "log.csv"
+  file-print (word who "," p-origin "," p-destination "," p-veloc-max "," p-in-time "," p-out-time)
+  file-close
+end
+
+to setup-do-log
+  if not file-exists? "log.csv"
+  [ file-open "log.csv"
+    file-print 
+  ]
 end
 
 
