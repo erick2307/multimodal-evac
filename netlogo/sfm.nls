@@ -129,12 +129,6 @@ to do-log
   file-close
 end
 
-to setup-do-log
-  if not file-exists? "log.csv"
-  [ file-open "log.csv"
-    file-print 
-  ]
-end
 
 
 

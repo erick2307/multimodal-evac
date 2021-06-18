@@ -23,9 +23,12 @@ to setup
   set peds-pen-flag false
   create-road
   create-sidewalk
+  create-border
   set-points
   if number-of-cars != 0 [ insert-cars ]
   ;insert-peds
+  let file "log-world.csv" ;user-new-file
+  export-world file
 end
 
 ;###########################################################################################################
@@ -216,7 +219,7 @@ width
 width
 5
 25
-25.0
+10.0
 5
 1
 m
@@ -231,7 +234,7 @@ height
 height
 5
 25
-25.0
+10.0
 5
 1
 m
@@ -246,7 +249,7 @@ swidth
 swidth
 1
 5
-2.0
+3.0
 0.5
 1
 m
@@ -276,7 +279,7 @@ number-of-pedestrians
 number-of-pedestrians
 1
 100
-100.0
+51.0
 1
 1
 NIL
@@ -336,7 +339,7 @@ car-look-ahead-cars
 car-look-ahead-cars
 1
 50
-50.0
+18.0
 1
 1
 m
@@ -351,7 +354,7 @@ car-look-ahead-peds
 car-look-ahead-peds
 0
 100
-21.0
+67.0
 1
 1
 m
@@ -366,7 +369,7 @@ car-stop-ahead-peds
 car-stop-ahead-peds
 0.5
 5
-1.5
+3.5
 0.5
 1
 m
@@ -396,7 +399,7 @@ alfaVP
 alfaVP
 10
 180
-180.0
+120.0
 10
 1
 deg
@@ -587,7 +590,7 @@ r
 r
 0.1
 10
-0.1
+1.0
 .1
 1
 NIL
