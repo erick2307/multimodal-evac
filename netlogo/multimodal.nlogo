@@ -339,7 +339,7 @@ car-look-ahead-cars
 car-look-ahead-cars
 1
 50
-18.0
+50.0
 1
 1
 m
@@ -545,7 +545,7 @@ v0
 v0
 0
 10
-0.1
+0.0
 0.1
 1
 NIL

@@ -36,6 +36,7 @@ to calc-territorial-forces
   set territorial-forcey 0
   ask other turtles with [distance myself > 0]
   [
+    let temp check-if-collision self myself
     let to-agent (towards myself) - 180
     let rabx [xcor] of myself - xcor
     let raby [ycor] of myself - ycor
@@ -129,7 +130,41 @@ to do-log
   file-close
 end
 
+;interaction with counter-flow pedestrians
+;Liu, M., Zeng, W., Chen, P. & Wu, X. 
+;A microscopic simulation model for pedestrian-pedestrian and pedestrian-vehicle interactions at crosswalks. 
+;Plos One 12, e0180992 (2017).
 
+to-report check-if-collision [ agent1 agent2 ] ;ttc is time to collision
+  let x-1 [xcor] of agent1
+  let y-1 [ycor] of agent1
+  let t-1 [heading] of agent1
+  let vx-1 [p-velocx] of agent1
+  let vy-1 [p-velocy] of agent1
+  
+  let x-2 [xcor] of agent2
+  let y-2 [ycor] of agent2
+  let t-2 [heading] of agent2
+  let vx-2 [p-velocx] of agent2
+  let vy-2 [p-velocy] of agent2
+  
+  let x-e-n rd (x-2 - x-1) 
+  let x-e-d (vx-2 * sin t-2 - vx-1 * sin t-1)
+  let y-e-n rd (y-2 - y-1)
+  let y-e-d (vy-2 * cos t-2 - vy-1 * cos t-1)
+  
+  ifelse x-e-d = 0 or y-e-d = 0 
+  [ show "parallel" report nobody ]
+  [ let t-x-e x-e-n / x-e-d
+    let t-y-e y-e-n / y-e-d
+    if t-x-e > 0 and t-y-e > 0
+    [ if abs(t-x-e - t-y-e) < 0.1 and t-x-e < 60 * fps [ ]  ]
+    show (word [who] of agent1 "," [who] of agent2 "," t-x-e "," t-y-e)
+    report nobody
+  ]
+end
+
+  
 
 
 
