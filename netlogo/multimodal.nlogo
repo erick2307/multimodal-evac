@@ -72,7 +72,7 @@ end
 
 to insert-peds
   create-peds 10 [
-    set shape "dot"
+    ;set shape "dot"
     set size rd 0.5 * 2
     set color one-of [ red blue green ]
     move-to get-one-origin-point
@@ -81,7 +81,7 @@ to insert-peds
     set p-origin first p-path
     set p-destination last p-path
     set p-goal item 1 p-path
-    set p-veloc-max rd ((random-normal 1.5 0.5) / fps)
+    set p-veloc-max rd (calc-veloc-max / fps) ; rd ((random-normal 1.5 0.5) / fps)
     set p-velocx p-veloc-max
     set p-velocy p-veloc-max
     set p-in-time ticks
