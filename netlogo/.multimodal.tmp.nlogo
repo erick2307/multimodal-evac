@@ -680,6 +680,23 @@ log?
 1
 -1000
 
+BUTTON
+738
+1021
+828
+1054
+labelpeds
+ask peds [ set label who set label-color black ]
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
 @#$#@#$#@
 ## WHAT IS IT?
 

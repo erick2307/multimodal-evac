@@ -42,17 +42,20 @@ end
 
 ;; find the territorial force according to the social forces model
 to calc-territorial-forces
-  ask other turtles with [distance myself > 0]
+  ask other turtles with [distance myself < rd 10 and distance myself > 0 ]
   [ let tc check-if-collision self myself
     let n (towards myself) - 180
     let Arb 0.19
     let Brab 1.35
     if tc != 0
       [ set territorial-forcex territorial-forcex + Arb * e ^ (-1 * tc / Brab ) * sin n
-        set territorial-forcey territorial-forcey + Arb * e ^ (-1 * tc / Brab ) * cos n 
-    show (word "tc:" tc ", n:" n ", Arb:" Arb ", Brab:" Brab ", tfx:" territorial-forcex ", tfy:" territorial-forcey) ]
-    
+        set territorial-forcey territorial-forcey + Arb * e ^ (-1 * tc / Brab ) * cos n
+        show (word "tc:" tc ", n:" n ", self:" self ", myself:" myself ", tfx:" territorial-forcex ", tfy:" territorial-forcey) 
+    ]
+  ]
+end
 
+;;This part was in calc-territorial-forces    
 ;    let to-agent (towards myself) - 180
 ;    let rabx [xcor] of myself - xcor
 ;    let raby [ycor] of myself - ycor
@@ -73,8 +76,7 @@ to calc-territorial-forces
 ;      set territorial-forcex territorial-forcex + agent-forcex * vision
 ;      set territorial-forcey territorial-forcey + agent-forcey * vision
 ;    ]
-  ]
-end
+;  ]
 
 ;interaction with counter-flow pedestrians
 ;Liu, M., Zeng, W., Chen, P. & Wu, X. 
