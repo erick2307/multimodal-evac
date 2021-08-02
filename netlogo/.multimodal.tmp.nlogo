@@ -9,8 +9,8 @@ globals [
 breed [ cars car ]
 breed [ peds ped ]
 
-peds-own [ p-origin p-destination p-path p-remain p-goal p-veloc-max ]
-cars-own [ c-goal c-veloc c-veloc-max ]
+peds-own [ p-origin p-destination p-path p-remain p-goal p-veloc-max p-in-time p-out-time]
+cars-own [ c-goal c-veloc c-veloc-max c-in-time c-out-time]
 
 to setup
   clear-all
@@ -23,9 +23,12 @@ to setup
   set peds-pen-flag false
   create-road
   create-sidewalk
+  create-border
   set-points
   if number-of-cars != 0 [ insert-cars ]
   ;insert-peds
+  let file "log-world.csv" ;user-new-file
+  export-world file
 end
 
 ;###########################################################################################################
@@ -36,6 +39,7 @@ to go
   if ticks mod (30 * fps) = 0 and count peds < max-peds [ insert-peds ]
   if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ insert-cars ]
   tick
+  if ticks = 164253 [ stop ]
 end
 
 ;###########################################################################################################
@@ -77,9 +81,10 @@ to insert-peds
     set p-origin first p-path
     set p-destination last p-path
     set p-goal item 1 p-path
-    set p-veloc-max rd ((random-normal 1.5 0.5) / fps)
+    set p-veloc-max rd (calc-veloc-max / fps) ; rd ((random-normal 1.5 0.5) / fps)
     set p-velocx p-veloc-max
     set p-velocy p-veloc-max
+    set p-in-time ticks
     if peds-pen-flag [ pd ]
     ;draw-path self
     ;set heading 90
@@ -90,7 +95,7 @@ end
 
 to c-move
   c-sense
-  c-decide
+  if count peds > 0 [ c-decide ]
   c-update
 end
 
@@ -175,8 +180,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 0
 99
@@ -244,7 +249,7 @@ swidth
 swidth
 1
 5
-4.0
+3.0
 0.5
 1
 m
@@ -274,7 +279,7 @@ number-of-pedestrians
 number-of-pedestrians
 1
 100
-100.0
+51.0
 1
 1
 NIL
@@ -349,7 +354,7 @@ car-look-ahead-peds
 car-look-ahead-peds
 0
 100
-100.0
+67.0
 1
 1
 m
@@ -364,7 +369,7 @@ car-stop-ahead-peds
 car-stop-ahead-peds
 0.5
 5
-5.0
+3.5
 0.5
 1
 m
@@ -379,7 +384,7 @@ alfaVV
 alfaVV
 10
 180
-180.0
+120.0
 10
 1
 deg
@@ -394,7 +399,7 @@ alfaVP
 alfaVP
 10
 180
-180.0
+120.0
 10
 1
 deg
@@ -532,25 +537,25 @@ NIL
 1
 
 SLIDER
-13
-833
-185
-866
+8
+739
+180
+772
 v0
 v0
 0
 10
-3.0
+0.0
 0.1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-13
-867
-185
-900
+8
+773
+180
+806
 sigma
 sigma
 0.1
@@ -562,10 +567,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-901
-185
-934
+8
+807
+180
+840
 u0
 u0
 0
@@ -577,25 +582,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-936
-185
-969
+8
+842
+180
+875
 r
 r
 0.1
 10
-0.1
+1.0
 .1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-12
-971
-184
-1004
+7
+877
+179
+910
 tau
 tau
 1
@@ -635,6 +640,53 @@ BUTTON
 282
 NIL
 go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+PLOT
+6
+915
+206
+1065
+Pedestrians
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"IN" 1.0 0 -13345367 true "" "plot count peds with [p-remain != []]"
+"pen-1" 1.0 0 -2674135 true "" "plot count peds with [p-remain = []]"
+
+SWITCH
+38
+215
+141
+248
+log?
+log?
+1
+1
+-1000
+
+BUTTON
+738
+1021
+828
+1054
+labelpeds
+ask peds [ set label who set label-color black ]
 NIL
 1
 T

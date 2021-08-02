@@ -7,49 +7,49 @@ to set-points
   let xi rd ((total + width) / 2)
   let xf rd ((total + width) / 2 + swidth)
   let y max-pycor
-  set p1 patches with [pxcor >= xi and pxcor <= xf and pycor = max-pycor]
+  set p1 patches with [pxcor >= xi and pxcor <= xf and pycor = max-pycor - 3]
   
   ;p2
   let yi rd ((total + height) / 2)
   let yf rd ((total + height) / 2 + swidth)
   let x max-pxcor
-  set p2 patches with [pycor >= yi and pycor <= yf and pxcor = max-pxcor]
+  set p2 patches with [pycor >= yi and pycor <= yf and pxcor = max-pxcor - 3]
   
   ;p3
   set yi rd ((total - height) / 2 - swidth)
   set yf rd ((total - height) / 2)
   set x max-pxcor
-  set p3 patches with [pycor >= yi and pycor <= yf and pxcor = max-pxcor]
+  set p3 patches with [pycor >= yi and pycor <= yf and pxcor = max-pxcor - 3]
   
   ;p4
   set xi rd ((total + width) / 2)
   set xf rd ((total + width) / 2 + swidth)
   set y min-pycor
-  set p4 patches with [pxcor >= xi and pxcor <= xf and pycor = min-pycor]
+  set p4 patches with [pxcor >= xi and pxcor <= xf and pycor = min-pycor + 3]
   
   ;p5
   set xi rd ((total - width) / 2 - swidth)
   set xf rd ((total - width) / 2)
   set y min-pycor
-  set p5 patches with [pxcor >= xi and pxcor <= xf and pycor = min-pycor]
+  set p5 patches with [pxcor >= xi and pxcor <= xf and pycor = min-pycor + 3]
   
   ;p6
   set yi rd ((total - height) / 2 - swidth)
   set yf rd ((total - height) / 2)
   set x min-pxcor
-  set p6 patches with [pycor >= yi and pycor <= yf and pxcor = min-pxcor]
+  set p6 patches with [pycor >= yi and pycor <= yf and pxcor = min-pxcor + 3]
   
   ;p7
   set yi rd ((total + height) / 2)
   set yf rd ((total + height) / 2 + swidth)
   set x min-pxcor
-  set p7 patches with [pycor >= yi and pycor <= yf and pxcor = min-pxcor]
+  set p7 patches with [pycor >= yi and pycor <= yf and pxcor = min-pxcor + 3]
   
   ;p8
   set xi rd ((total - width) / 2 - swidth)
   set xf rd ((total - width) / 2)
   set y max-pycor
-  set p8 patches with [pxcor >= xi and pxcor <= xf and pycor = max-pycor]
+  set p8 patches with [pxcor >= xi and pxcor <= xf and pycor = max-pycor - 3]
   
   ;p9
   set xi rd ((total + width) / 2)
