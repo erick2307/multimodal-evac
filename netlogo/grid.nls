@@ -12,7 +12,7 @@ to draw-grid
   ask bots [ 
     set ycor min-pycor + 2.5
     set xcor i + .5
-    set color 9
+    set color grid-color
     set heading 0
     pd
     fd (world-height - 6)
@@ -27,7 +27,7 @@ to draw-grid
   ask bots [
     set xcor min-pxcor + 2.5
     set ycor i + .5
-    set color 9
+    set color grid-color
     set heading 90
     pd
     fd (world-width - 6)

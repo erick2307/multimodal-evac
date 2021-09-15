@@ -1,32 +1,47 @@
 __includes [ "env.nls" "grid.nls" "routes.nls" "sfm.nls"]
 
 globals [
+  ;color variables
+  frame-color
+  road-color
+  sw-color
+  bldg-color
+  grid-color
+
+  ;other variables
   scale
-  total
+  total-width
   peds-pen-flag
 ]
 
 breed [ cars car ]
 breed [ peds ped ]
 
-peds-own [ p-origin p-destination p-path p-remain p-goal p-veloc-max p-in-time p-out-time]
-cars-own [ c-goal c-veloc c-veloc-max c-in-time c-out-time]
+peds-own [ p-size p-origin p-destination p-path p-remain p-goal p-veloc-max p-in-time p-out-time]
+cars-own [ c-size c-goal c-veloc c-veloc-max c-in-time c-out-time]
 
 to setup
   clear-all
   reset-ticks
   random-seed 1
-  ask patches [ set pcolor white ]
+
+  set frame-color white; black
+  set road-color gray ;white
+  set sw-color black ;gray
+  set bldg-color 89
+  set grid-color 9
+
+  ask patches [ set pcolor road-color ]
   set scale 0.5 ;(m/patch)
-  set total max-pxcor * scale ;m
+  set total-width max-pxcor * scale ;m
   set grid-flag false
   set peds-pen-flag false
   create-road
   create-sidewalk
   create-border
   set-points
-  if number-of-cars != 0 [ insert-cars ]
-  ;insert-peds
+  ;if number-of-cars != 0 [ insert-cars ]
+  ;if number-of-pedestrians != 0 [ insert-peds ]
   let file "log-world.csv" ;user-new-file
   export-world file
 end
@@ -46,11 +61,11 @@ end
 
 to insert-cars
   create-cars 1 [
-    set shape "dot" ;"car top"
-    set size rd 5
+    set shape "car top"
+    set size rd 2
     set color one-of [ red blue ]
     set xcor min-pxcor + swidth / scale
-    set ycor rd ((2 * total + height) / 4 )
+    set ycor rd ((2 * total-width + height) / 4 )
     set c-goal patch max-pxcor ycor
     set c-veloc-max random-normal 13.8 0.5 / fps
     set c-veloc c-veloc-max
@@ -58,11 +73,11 @@ to insert-cars
   ]
 
   create-cars 1 [
-    set shape "dot" ;"car top"
-    set size rd 5
+    set shape "car top"
+    set size rd 2
     set color blue
     set xcor max-pxcor - swidth / scale
-    set ycor rd ((2 * total - height) / 4 )
+    set ycor rd ((2 * total-width - height) / 4 )
     set c-goal patch min-pxcor ycor
     set c-veloc-max random-normal 13.8 0.5 / fps ;m/s
     set c-veloc c-veloc-max
@@ -73,7 +88,7 @@ end
 to insert-peds
   create-peds 10 [
     set shape "dot"
-    set size rd 0.5 * 2
+    set size rd 0.5
     set color one-of [ red blue green ]
     move-to get-one-origin-point
     set p-path select-trajectory patch-here
@@ -264,7 +279,7 @@ number-of-cars
 number-of-cars
 0
 100
-0.0
+100.0
 1
 1
 NIL
@@ -279,7 +294,7 @@ number-of-pedestrians
 number-of-pedestrians
 1
 100
-51.0
+100.0
 1
 1
 NIL
@@ -486,7 +501,7 @@ INPUTBOX
 130
 344
 max-cars
-10.0
+100.0
 1
 0
 Number
@@ -508,7 +523,7 @@ BUTTON
 454
 1053
 POINTS ON/OFF
-ifelse points-flag\n[ask odps [ set pcolor gray ] set points-flag false ]\n[ask odps [ set pcolor red ] set points-flag true ]
+ifelse points-flag\n[ask odps [ set pcolor sw-color ] set points-flag false ]\n[ask odps [ set pcolor red ] set points-flag true ]
 NIL
 1
 T

@@ -50,7 +50,7 @@ to calc-territorial-forces
     if tc != 0
       [ set territorial-forcex territorial-forcex + Arb * e ^ (-1 * tc / Brab ) * sin n
         set territorial-forcey territorial-forcey + Arb * e ^ (-1 * tc / Brab ) * cos n
-        show (word "tc:" tc ", n:" n ", self:" self ", myself:" myself ", tfx:" territorial-forcex ", tfy:" territorial-forcey) 
+        ;show (word "tc:" tc ", n:" n ", self:" self ", myself:" myself ", tfx:" territorial-forcex ", tfy:" territorial-forcey) 
     ]
   ]
 end
@@ -170,7 +170,7 @@ end
 to calc-obstacle-force
   set obstacle-forcex 0
   set obstacle-forcey 0
-  ask patches in-radius (rd swidth) with [pcolor = 89]
+  ask patches in-radius (rd swidth) with [pcolor = bldg-color]
   [
     let to-obstacle (towards myself) - 180
     let obstacle-force (- u0) * exp (- (distance myself) / r)
