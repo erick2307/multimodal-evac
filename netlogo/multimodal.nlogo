@@ -232,9 +232,9 @@ SLIDER
 45
 width
 width
-5
+2
 25
-10.0
+2.0
 5
 1
 m
@@ -247,9 +247,9 @@ SLIDER
 78
 height
 height
-5
+2
 25
-10.0
+2.0
 5
 1
 m
@@ -340,7 +340,7 @@ INPUTBOX
 58
 344
 fps
-60.0
+120.0
 1
 0
 Number
@@ -1052,7 +1052,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
