@@ -62,7 +62,7 @@ to go
   if ticks mod (30 * fps) = 0 and count peds < max-peds [ insert-peds ]
   if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ insert-cars ]
   tick
-  if ticks = 4332000 [ stop ]
+  ;if ticks =  [ stop ]
 end
 
 ;###########################################################################################################
