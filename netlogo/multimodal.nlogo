@@ -59,7 +59,7 @@ end
 to go
   ask cars [ c-move ]
   ask peds [ p-move-2 ]
-  if ticks mod (30 * fps) = 0 and count peds < max-peds [ insert-peds ]
+  if ticks mod (10 * fps) = 0 and count peds < max-peds [ insert-peds ]
   if number-of-cars > 0 and ticks mod (10 * fps) = 0 and count cars < max-cars [ insert-cars ]
   tick
   if ticks = 4332000 [ stop ]
@@ -326,7 +326,7 @@ swidth
 swidth
 1
 5
-3.0
+2.5
 0.5
 1
 m
@@ -622,7 +622,7 @@ v0
 v0
 0
 10
-0.0
+2.1
 0.1
 1
 NIL
@@ -667,7 +667,7 @@ r
 r
 0.1
 10
-1.0
+10.0
 .1
 1
 NIL
@@ -682,7 +682,7 @@ tau
 tau
 1
 30
-1.0
+7.0
 1
 1
 NIL
@@ -753,7 +753,7 @@ SWITCH
 248
 log?
 log?
-0
+1
 1
 -1000
 
