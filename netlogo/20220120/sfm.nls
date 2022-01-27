@@ -1,0 +1,286 @@
+;; MODIFIED FROM on http://modelingcommons.org/browse/one_model/3645#model_tabs_browse_info
+
+turtles-own
+[
+  p-velocx                ;; x velocity
+  p-velocy                ;; y velocity
+  desired-direction ;; my desired direction
+  driving-forcex    ;; my main motivating force
+  driving-forcey
+  obstacle-forcex   ;; force exerted by obstacles
+  obstacle-forcey
+  territorial-forcex;; force exerted by neighbors
+  territorial-forcey
+]
+
+;; verify if the agent has arrived to its destination
+to verify-arrival-peds
+  if patch-here = p-goal and patch-here != p-destination [ set p-goal first p-remain set p-remain but-first p-remain ]
+  if patch-here = p-destination
+  [ set p-out-time ticks 
+    set p-time-at-intersection (p-out-time - p-in-time) / fps
+    if log? [do-log] 
+    die 
+  ]
+end
+
+to verify-arrival-cars
+  if patch-here = c-goal  [ set c-out-time ticks die ]
+end
+
+;; find the heading towards the nearest goal
+to calc-desired-direction
+  set desired-direction towards p-goal
+end
+
+;; find the driving force of the turtle
+to calc-driving-force
+  set driving-forcex (1 / tau) * (p-veloc-max * (sin desired-direction) - p-velocx); + partial-forcesx 
+  set driving-forcey (1 / tau) * (p-veloc-max * (cos desired-direction) - p-velocy); + partial-forcesy
+end
+
+to-report calc-veloc-max
+  let a0 0.0027
+  let tw 1
+  let a1 -0.56
+  let rho 0
+  let a2 1.5
+  let err random-normal 0 ( 0.54 ^ 2 )
+  report a0 * tw + a1 * rho + a2 + err
+end
+
+;; find the territorial force according to the social forces model
+to calc-territorial-forces
+  ask other turtles with [distance myself < rd 10 and distance myself > 0 ]
+  [ let tc check-if-collision self myself
+    let n (towards myself) - 180
+    if tc != 0
+      [ set territorial-forcex territorial-forcex + Arb * e ^ (-1 * tc / Brab ) * sin n
+        set territorial-forcey territorial-forcey + Arb * e ^ (-1 * tc / Brab ) * cos n
+        ;show (word "tc:" tc ", n:" n ", self:" self ", myself:" myself ", tfx:" territorial-forcex ", tfy:" territorial-forcey) 
+ 
+    ]
+  ]
+end
+
+;;This part was in calc-territorial-forces    
+;    let to-agent (towards myself) - 180
+;    let rabx [xcor] of myself - xcor
+;    let raby [ycor] of myself - ycor
+;    let speed magnitude p-velocx p-velocy
+;    let to-root ((magnitude rabx raby) + (magnitude (rabx - (speed * sin desired-direction)) (raby - (speed * cos desired-direction)))) ^ 2 - speed ^ 2
+;    if to-root < 0
+;    [set to-root 0]
+;    let b 0.5 * sqrt to-root
+;
+;    let agent-force (- v0) * exp (- b / sigma)
+
+;    ask myself
+;    [
+;      let agent-forcex agent-force * (sin to-agent)
+;      let agent-forcey agent-force * (cos to-agent)
+;      ;; modify the effect this force has based on whether or not it is in the field of view
+;      let vision field-of-view-modifier driving-forcex driving-forcey agent-forcex agent-forcey
+;      set territorial-forcex territorial-forcex + agent-forcex * vision
+;      set territorial-forcey territorial-forcey + agent-forcey * vision
+;    ]
+;  ]
+
+;interaction with counter-flow pedestrians
+;Liu, M., Zeng, W., Chen, P. & Wu, X. 
+;A microscopic simulation model for pedestrian-pedestrian and pedestrian-vehicle interactions at crosswalks. 
+;Plos One 12, e0180992 (2017).
+
+to-report check-if-collision [ agent1 agent2 ] ;ttc is time to collision
+  let x-1 [xcor] of agent1
+  let y-1 [ycor] of agent1
+  let t-1 [heading] of agent1
+  let vx-1 [p-velocx] of agent1
+  let vy-1 [p-velocy] of agent1
+  
+  let x-2 [xcor] of agent2
+  let y-2 [ycor] of agent2
+  let t-2 [heading] of agent2
+  let vx-2 [p-velocx] of agent2
+  let vy-2 [p-velocy] of agent2
+  
+  let x-e-n rd (x-2 - x-1) 
+  let x-e-d (vx-2 * sin t-2 - vx-1 * sin t-1)
+  let y-e-n rd (y-2 - y-1)
+  let y-e-d (vy-2 * cos t-2 - vy-1 * cos t-1)
+  
+  ifelse x-e-d = 0 or y-e-d = 0 
+  [ ;show "parallel" 
+  report 100]
+  [ let t-x-e x-e-n / x-e-d
+    let t-y-e y-e-n / y-e-d
+    if abs(t-x-e - t-y-e) < 10
+    [ ;show (word [who] of agent1 "," [who] of agent2 "," t-x-e "," t-y-e) 
+      report abs(t-x-e - t-y-e)
+    ]
+      report 100
+  ]
+end
+;;===================================
+
+;; reports a two-item list of x and y coordinates, or an empty
+;; list if no intersection is found
+to-report intersection [t1 t2]
+  let m1 [tan (90 - heading)] of t1
+  let m2 [tan (90 - heading)] of t2
+  ;; treat parallel/collinear lines as non-intersecting
+  if m1 = m2 [ report [] ]
+  ;; is t1 vertical? if so, swap the two turtles
+  if abs m1 = tan 90
+  [
+    ifelse abs m2 = tan 90
+      [ report [] ]
+      [ report intersection t2 t1 ]
+  ]
+  ;; is t2 vertical? if so, handle specially
+  if abs m2 = tan 90 [
+     ;; represent t1 line in slope-intercept form (y=mx+c)
+      let c1 [ycor - xcor * m1] of t1
+      ;; t2 is vertical so we know x already
+      let x [xcor] of t2
+      ;; solve for y
+      let y m1 * x + c1
+      ;; check if intersection point lies on both segments
+      if not [x-within? x] of t1 [ report [] ]
+      if not [y-within? y] of t2 [ report [] ]
+      report list x y
+  ]
+  ;; now handle the normal case where neither turtle is vertical;
+  ;; start by representing lines in slope-intercept form (y=mx+c)
+  let c1 [ycor - xcor * m1] of t1
+  let c2 [ycor - xcor * m2] of t2
+  ;; now solve for x
+  let x (c2 - c1) / (m1 - m2)
+  ;; check if intersection point lies on both segments
+  if not [x-within? x] of t1 [ report [] ]
+  if not [x-within? x] of t2 [ report [] ]
+  report list x (m1 * x + c1)
+end
+
+to-report x-within? [x]  ;; turtle procedure
+  report abs (xcor - x) <= abs (size / 2 * dx)
+end
+
+to-report y-within? [y]  ;; turtle procedure
+  report abs (ycor - y) <= abs (size / 2 * dy)
+end
+
+
+
+
+;;===================================
+;; find the obstacle force of the turtle according to the social forces model
+to calc-obstacle-force
+  set obstacle-forcex 0
+  set obstacle-forcey 0
+  ask patches in-radius (rd swidth) with [pcolor = bldg-color]
+  [
+    let to-obstacle (towards myself) - 180
+    let obstacle-force (- u0) * exp (- (distance myself) / r0)
+    ask myself
+    [
+      set obstacle-forcex obstacle-forcex + obstacle-force * (sin to-obstacle)
+      set obstacle-forcey obstacle-forcey + obstacle-force * (cos to-obstacle)
+    ]
+  ]
+  ask cars in-radius (rd 5)
+  [
+    let to-obstacle (towards myself) - 180
+    let obstacle-force (- u1) * exp (- (distance myself) / r1)
+    ask myself
+    [
+      set obstacle-forcex obstacle-forcex + obstacle-force * (sin to-obstacle)
+      set obstacle-forcey obstacle-forcey + obstacle-force * (cos to-obstacle)
+    ]
+  ]
+  let p-patch patch-here
+  ask other peds in-radius (rd 1) 
+  [ if patch-here != p-patch
+    [let to-obstacle (towards myself) - 180
+    let obstacle-force (- u2) * exp (- (distance myself) / r2)
+    ask myself
+    [
+      set obstacle-forcex obstacle-forcex + obstacle-force * (sin to-obstacle)
+      set obstacle-forcey obstacle-forcey + obstacle-force * (cos to-obstacle)
+    ]
+  ]]
+end
+
+;; helper function to find the magnitude of a vector
+to-report magnitude [x y]
+  report sqrt ((x ^ 2) + (y ^ 2))
+end 
+
+;; returns 1 if the angle between the desired vector and the force vector is within a threshold, else return c
+to-report field-of-view-modifier [desiredx desiredy forcex forcey]
+  ifelse (desiredx * (- forcex) + desiredy * (- forcey)) >= (magnitude forcex forcey) * cos (360 / 2)
+  [ report 1 ]
+  [ report 0.1]
+end
+
+to do-log
+  if p-route = 1
+  [ file-open "log2dpar.csv"]
+  if p-route = 2
+  [ file-open "log2dper.csv"]
+  if p-route = 3
+  [ file-open "log3d.csv"]
+  if p-route = 4
+  [ file-open "log4d.csv"]
+  if p-route = 5
+  [ file-open "log4df.csv"]
+  file-print (word who "," p-origin "," p-destination "," p-veloc-max "," p-num-of-peds "," p-num-of-cars "," p-num-of-crossings 
+  "," p-in-time "," p-out-time "," p-time-at-intersection)
+  file-close
+end
+
+
+;; move the turtle according to the rules of the social forces model
+to move-peds
+  let ax driving-forcex + obstacle-forcex + territorial-forcex ;missing attractive from leading pedestrians - vehicles force - fluctuation term (fe)
+  let ay driving-forcey + obstacle-forcey + territorial-forcey
+  
+  set p-velocx p-velocx + ax
+  set p-velocy p-velocy + ay
+  
+  ;; scale down the velocity if it is too high
+  let vmag magnitude p-velocx p-velocy
+  let multiplier 1
+  if vmag > p-veloc-max
+  [set multiplier p-veloc-max / vmag]
+
+  set p-velocx p-velocx * multiplier
+  set p-velocy p-velocy * multiplier
+
+  set xcor xcor + p-velocx
+  set ycor ycor + p-velocy
+  
+  if p-velocx != 0
+  [ set heading atan p-velocx p-velocy ]
+  
+  set territorial-forcex 0
+  set territorial-forcey 0
+end
+
+to check-p-collision
+  let p-patch patch-here
+  ifelse any? other peds with [patch-here = p-patch]
+  [set color pink
+  set p-collision p-collision + 1]
+  [set color p-color]
+end
+
+to check-p-at-sw
+  if not in-intersection and pcolor != sw-color
+  [set p-out-sw p-out-sw + 1]
+;  show p-out-sw
+end  
+  
+  
+  
+  
