@@ -1,0 +1,221 @@
+globals [ p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 odps points-flag ]
+
+to set-points
+  set points-flag false
+  
+  ;p1
+  let xi rd ((total-width + width) / 2)
+  let xf rd ((total-width + width) / 2 + swidth)
+  let y max-pycor
+  set p1 patches with [pxcor >= xi and pxcor <= xf and pycor = max-pycor - 3]
+  
+  ;p2
+  let yi rd ((total-width + height) / 2)
+  let yf rd ((total-width + height) / 2 + swidth)
+  let x max-pxcor
+  set p2 patches with [pycor >= yi and pycor <= yf and pxcor = max-pxcor - 3]
+  
+  ;p3
+  set yi rd ((total-width - height) / 2 - swidth)
+  set yf rd ((total-width - height) / 2)
+  set x max-pxcor
+  set p3 patches with [pycor >= yi and pycor <= yf and pxcor = max-pxcor - 3]
+  
+  ;p4
+  set xi rd ((total-width + width) / 2)
+  set xf rd ((total-width + width) / 2 + swidth)
+  set y min-pycor
+  set p4 patches with [pxcor >= xi and pxcor <= xf and pycor = min-pycor + 3]
+  
+  ;p5
+  set xi rd ((total-width - width) / 2 - swidth)
+  set xf rd ((total-width - width) / 2)
+  set y min-pycor
+  set p5 patches with [pxcor >= xi and pxcor <= xf and pycor = min-pycor + 3]
+  
+  ;p6
+  set yi rd ((total-width - height) / 2 - swidth)
+  set yf rd ((total-width - height) / 2)
+  set x min-pxcor
+  set p6 patches with [pycor >= yi and pycor <= yf and pxcor = min-pxcor + 3]
+  
+  ;p7
+  set yi rd ((total-width + height) / 2)
+  set yf rd ((total-width + height) / 2 + swidth)
+  set x min-pxcor
+  set p7 patches with [pycor >= yi and pycor <= yf and pxcor = min-pxcor + 3]
+  
+  ;p8
+  set xi rd ((total-width - width) / 2 - swidth)
+  set xf rd ((total-width - width) / 2)
+  set y max-pycor
+  set p8 patches with [pxcor >= xi and pxcor <= xf and pycor = max-pycor - 3]
+  
+  ;p9
+  set xi rd ((total-width + width) / 2)
+  set xf rd ((total-width + width) / 2 + swidth)
+  set yi rd ((total-width + height) / 2)
+  set yf rd ((total-width + height) / 2 + swidth)
+  set p9 patches with [pxcor >= xi and pxcor <= xf and pycor >= yi and pycor <= yf]
+  
+  ;p10
+  set xi rd ((total-width + width) / 2)
+  set xf rd ((total-width + width) / 2 + swidth)
+  set yi rd ((total-width - height) / 2 - swidth)
+  set yf rd ((total-width - height) / 2)
+  set p10 patches with [pxcor >= xi and pxcor <= xf and pycor >= yi and pycor <= yf]
+  
+  ;p11
+  set xi rd ((total-width - width) / 2 - swidth)
+  set xf rd ((total-width - width) / 2)
+  set yi rd ((total-width - height) / 2 - swidth)
+  set yf rd ((total-width - height) / 2)
+  set p11 patches with [pxcor >= xi and pxcor <= xf and pycor >= yi and pycor <= yf]
+  
+  ;p12
+  set xi rd ((total-width - width) / 2 - swidth)
+  set xf rd ((total-width - width) / 2)
+  set yi rd ((total-width + height) / 2)
+  set yf rd ((total-width + height) / 2 + swidth)
+  set p12 patches with [pxcor >= xi and pxcor <= xf and pycor >= yi and pycor <= yf]
+  
+  set odps (patch-set p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12) 
+end
+
+;this code is in a button - changes here are not reflected - change in the button-code-panel
+to points-on-off
+  ifelse points-flag
+  [ask odps [ set pcolor sw-color ] set points-flag false ]
+  [ask odps [ set pcolor red ] set points-flag true ]
+end
+
+to-report select-trajectory [ current-patch ]
+  
+  if p-route = 1 or p-route = 2 or p-route = 3 or p-route = 4
+  [if member? current-patch p1 
+  [ report (list current-patch one-of p9 one-of p10 one-of p4)]
+  
+  if member? current-patch p2 
+  [ report (list current-patch one-of p9 one-of p12 one-of p7)]
+  
+  if member? current-patch p3
+  [ report (list current-patch one-of p10 one-of p11 one-of p6)]
+  
+  if member? current-patch p4
+  [ report (list current-patch one-of p10 one-of p9 one-of p1)]
+  
+  if member? current-patch p5
+  [ report (list current-patch one-of p11 one-of p12 one-of p8)]
+  
+  if member? current-patch p6
+  [ report (list current-patch one-of p11 one-of p10 one-of p3)]
+  
+  if member? current-patch p7
+  [ report (list current-patch one-of p12 one-of p9 one-of p2)]  
+
+  if member? current-patch p8
+  [ report (list current-patch one-of p12 one-of p11 one-of p5)]  
+  ]
+
+  if p-route = 5
+  [if member? current-patch p1 
+  [ report one-of ( list 
+    (list current-patch one-of p9 one-of p2)
+    (list current-patch one-of p9 one-of p10 one-of p3) 
+    (list current-patch one-of p9 one-of p10 one-of p4) 
+    (list current-patch one-of p9 one-of p10 one-of p11 one-of (patch-set p5 p6))
+    (list current-patch one-of p9 one-of p12 one-of p7)
+    (list current-patch one-of p9 one-of p12 one-of p11 one-of (patch-set p5 p6))
+    )
+    ]
+  
+  if member? current-patch p2 
+  [ report one-of ( list 
+    (list current-patch one-of p9 one-of p1)
+    (list current-patch one-of p9 one-of p10 one-of p4) 
+    (list current-patch one-of p9 one-of p10 one-of p11 one-of (patch-set p5 p6))
+    (list current-patch one-of p9 one-of p12 one-of p7)
+    (list current-patch one-of p9 one-of p12 one-of p8)
+    (list current-patch one-of p9 one-of p12 one-of p11 one-of (patch-set p5 p6))
+    )
+    ]
+  
+  if member? current-patch p3
+  [ report one-of ( list 
+    (list current-patch one-of p10 one-of p4) 
+    (list current-patch one-of p10 one-of p11 one-of p5) 
+    (list current-patch one-of p10 one-of p11 one-of p6)
+    (list current-patch one-of p10 one-of p11 one-of p12 one-of (patch-set p7 p8))
+    (list current-patch one-of p10 one-of p9 one-of p1) 
+    (list current-patch one-of p10 one-of p9 one-of p12 one-of (patch-set p7 p8))
+    )
+    ]
+  
+  if member? current-patch p4
+  [ report one-of ( list 
+    (list current-patch one-of p10 one-of p3)  
+    (list current-patch one-of p10 one-of p11 one-of p6)
+    (list current-patch one-of p10 one-of p11 one-of p12 one-of (patch-set p7 p8))
+    (list current-patch one-of p10 one-of p9 one-of p1)
+    (list current-patch one-of p10 one-of p9 one-of p2) 
+    (list current-patch one-of p10 one-of p9 one-of p12 one-of (patch-set p7 p8))
+    )
+    ]
+  
+  if member? current-patch p5
+  [ report one-of ( list 
+    (list current-patch one-of p11 one-of p6) 
+    (list current-patch one-of p11 one-of p12 one-of p7) 
+    (list current-patch one-of p11 one-of p12 one-of p8)
+    (list current-patch one-of p11 one-of p10 one-of p9 one-of (patch-set p1 p2))
+    (list current-patch one-of p11 one-of p10 one-of p3) 
+    (list current-patch one-of p11 one-of p12 one-of p9 one-of (patch-set p1 p2))
+    )
+   ]
+  
+    if member? current-patch p6
+  [ report one-of ( list 
+    (list current-patch one-of p11 one-of p5) 
+    (list current-patch one-of p11 one-of p12 one-of p8)
+    (list current-patch one-of p11 one-of p10 one-of p9 one-of (patch-set p1 p2))
+    (list current-patch one-of p11 one-of p10 one-of p3)
+    (list current-patch one-of p11 one-of p10 one-of p4)
+    (list current-patch one-of p11 one-of p12 one-of p9 one-of (patch-set p1 p2))
+    )
+    ]
+  
+  if member? current-patch p7
+  [ report one-of ( list 
+    (list current-patch one-of p12 one-of p8)
+    (list current-patch one-of p12 one-of p11 one-of p5) 
+    (list current-patch one-of p12 one-of p11 one-of p10 one-of (patch-set p3 p4))
+    (list current-patch one-of p12 one-of p9 one-of p1) 
+    (list current-patch one-of p12 one-of p9 one-of p2) 
+    (list current-patch one-of p12 one-of p9 one-of p10 one-of (patch-set p3 p4))
+    )
+    ]  
+
+  if member? current-patch p8
+  [ report one-of ( list 
+    (list current-patch one-of p12 one-of p7)
+    (list current-patch one-of p12 one-of p11 one-of p5) 
+    (list current-patch one-of p12 one-of p11 one-of p6)
+    (list current-patch one-of p12 one-of p11 one-of p10 one-of (patch-set p3 p4)) 
+    (list current-patch one-of p12 one-of p9 one-of p2) 
+    (list current-patch one-of p12 one-of p9 one-of p10 one-of (patch-set p3 p4))
+    )
+    ]  
+  ]
+  
+end
+
+to-report get-one-origin-point
+   if p-route = 1
+  [report one-of (patch-set p2 p3 p6 p7)]
+   if p-route = 2
+  [report one-of (patch-set p1 p6 p7 p8)]
+   if p-route = 3
+  [report one-of (patch-set p1 p4 p5 p6 p7 p8)]
+   if p-route = 4 or p-route = 5
+  [report one-of (patch-set p1 p2 p3 p4 p5 p6 p7 p8)]
+end
